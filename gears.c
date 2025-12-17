@@ -82,7 +82,7 @@ float module(){
 
 
 void calculate_bevel_gear(){
-	printf("\n--- Конической передачи ---\n");
+	printf("\n--- Расчет Конической передачи ---\n");
 
 	struct var context[MAX_VARS];
 	size_t context_len = 0;
@@ -131,6 +131,48 @@ void calculate_bevel_gear(){
 	printf("Угол делительных конусов delta2: %.3f мм\n", delta2.value);
 	printf("Внешнее конусное расстояние: %.3f мм\n", Re.value);
 	printf("Ширина зубчатого венца: %.3f мм\n", b.value);
+}
+
+void calculate_hypoid(){
+	printf("\n--- Расчет Дифференциала/Гипоидной передачи ---\n");
+	calculate_bevel_gear();
+
+	struct var context[MAX_VARS];
+	size_t context_len = 0;
+	const char* formula_file = "hypoid";
+
+	struct maybe_double d1 = start_loop((char*)formula_file, (char*)"de1", context, &context_len);
+	struct maybe_double d2 = start_loop((char*)formula_file, (char*)"de2", context, &context_len);
+	struct maybe_double distance_a = start_loop((char*)formula_file, (char*)"A", context, &context_len);
+	struct maybe_double theta = start_loop((char*)formula_file, (char*)"theta", context, &context_len);	
+	struct maybe_double sin_theta = start_loop((char*)formula_file, (char*)"sin_theta", context, &context_len);
+	struct maybe_double ratio_z = start_loop((char*)formula_file, (char*)"ratio_z", context, &context_len);	
+	struct maybe_double delta2 = start_loop((char*)formula_file, (char*)"delta2", context, &context_len);
+	struct maybe_double delta1 = start_loop((char*)formula_file, (char*)"delta1", context, &context_len);
+	struct maybe_double Re1 = start_loop((char*)formula_file, (char*)"Re1", context, &context_len);
+	struct maybe_double Re2 = start_loop((char*)formula_file, (char*)"Re2", context, &context_len);
+	struct maybe_double beta2_deg = start_loop((char*)formula_file, (char*)"beta2_deg", context, &context_len);
+	struct maybe_double beta2 = start_loop((char*)formula_file, (char*)"beta2", context, &context_len);
+	struct maybe_double sin_beta2 = start_loop((char*)formula_file, (char*)"sin_beta2", context, &context_len);
+	struct maybe_double beta1 = start_loop((char*)formula_file, (char*)"beta1", context, &context_len);
+	struct maybe_double dae1 = start_loop((char*)formula_file, (char*)"dae1", context, &context_len);
+	struct maybe_double dae2 = start_loop((char*)formula_file, (char*)"dae2", context, &context_len);
+
+
+  printf("\n--- Использованные параметры ---\n");
+  for (size_t i = 0; i < context_len; i++) {
+      printf("%s = %.3f\n", context[i].name, context[i].value);
+  }
+	printf("d1: %.3f мм\n", d1.value);
+	printf("d2: %.3f мм\n", d2.value);
+	printf("a: %.3f мм\n", distance_a.value);
+	printf("delta1: %.3f мм\n", delta1.value);
+	printf("delta2: %.3f мм\n", delta2.value);
+	printf("re: %.3f мм\n", Re1.value);
+	printf("beta2: %.3f мм\n", beta2.value);
+	printf("beta1: %.3f мм\n", beta1.value);
+	printf("dae1: %.3f мм\n", dae1.value);
+	printf("dae2: %.3f мм\n", dae2.value);
 }
 
 
@@ -481,9 +523,10 @@ void top_gear(){
 				printf("-> 2. Расчитать передаточное число ступеней\n");
 				printf("-> 3. Расчитать межосевое расстояние цепи шестерен\n");
 				printf("-> 4. Расчитать планетарную передачу\n");
-				printf("-> 5. Расчитать Дифференциал\n");
-        printf("-> 6. Вернуться к выбору опций Шестерни\n");
-        printf("-> 7. Вернуться в меню\n");
+				printf("-> 5. Расчитать Коническую шестерню\n");
+				printf("-> 6. Расчитать гипоидную шестерню");
+        printf("-> 7. Вернуться к выбору опций Шестерни\n");
+        printf("-> 8. Вернуться в меню\n");
         int8_t choise;
         scanf("%" SCNd8, &choise);
         clear_stdin();
@@ -493,8 +536,9 @@ void top_gear(){
 								case 3: calculate_center_distances(); break;
 								case 4: calculate_radial_distances(); break;
 								case 5: calculate_bevel_gear(); break;
-                case 6: gear_menu(); break;
-                case 7: main_menu(); break;
+								case 6: calculate_hypoid(); break;
+                case 7: gear_menu(); break;
+                case 8: main_menu(); break;
         }
 }
 

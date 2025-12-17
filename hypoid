@@ -1,0 +1,53 @@
+#de1
+m_n * z1
+
+#de2
+m_n * z2
+
+#A
+sqrt ( ( de2 / 2 ) * ( de2 / 2 ) + E * E )
+
+#theta
+atan ( 2 * E / de2 )
+
+#sin_theta
+sin ( theta )
+
+#ratio_z
+z2 / z1
+
+#delta2
+atan ( ratio_z * sin_theta )
+
+#delta1
+1.5707963267948966 - theta - delta2
+
+#Re1
+de1 / ( 2 * sin ( delta1 ) )
+
+#Re2
+de2 / ( 2 * sin ( delta2 + theta ) )
+
+#Re
+Re1
+
+#beta2_deg
+40
+
+#beta2
+beta2_deg * 0.017453292519943295
+
+#sin_beta2
+sin ( beta2 )
+
+#beta1
+asin ( ( z1 / z2 ) * sin_beta2 ) + theta
+
+#dae1
+de1 + 2 * m_n * cos ( delta1 ) * cos ( beta1 )
+
+#dae2
+de2 + 2 * m_n * cos ( delta2 ) * cos ( beta2 )
+
+#i
+z2 / z1

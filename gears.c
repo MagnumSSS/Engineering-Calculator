@@ -89,7 +89,48 @@ void calculate_bevel_gear(){
 
 	const char* formula_file = "bevel_gear";
 	
+	struct maybe_double d1 = start_loop((char*)formula_file, (char*)"de1", context, &context_len);
+	if(d1.valid){
+		printf("Делительный диаметр полуосевой шестерни: %.3f мм\n", d1.value);
+	}
+	struct maybe_double d2 = start_loop((char*)formula_file, (char*)"de2", context, &context_len);
+	if(d2.valid){
+		printf("Делительный диаметр сателлита: %.3f мм\n", d2.value);
+	}
+
+	struct maybe_double ratio1 = start_loop((char*)formula_file, (char*)"ratio1", context, &context_len);
+	struct maybe_double ratio2 = start_loop((char*)formula_file, (char*)"ratio2", context, &context_len);
+
+	struct maybe_double delta1 = start_loop((char*)formula_file, (char*)"delta1", context, &context_len);
+	if(delta1.valid){
+		printf("Угол делительных конусов delta1: %.3f мм\n", delta1.value);
+	}
 	
+	struct maybe_double delta2 = start_loop((char*)formula_file, (char*)"delta2", context, &context_len);
+	if(delta2.valid){
+		printf("Угол делительных конусов delta2: %.3f мм\n", delta2.value);
+	}
+	
+	struct maybe_double Re = start_loop((char*)formula_file, (char*)"Re", context, &context_len);
+	if(Re.valid){
+		printf("Внешнее конусное расстояние: %.3f мм\n", Re.value);
+	}
+	
+	struct maybe_double b = start_loop((char*)formula_file, (char*)"b", context, &context_len);
+	if(b.valid){
+		printf("Ширина зубчатого венца: %.3f мм\n", b.value);
+	}
+
+  printf("\n--- Использованные параметры ---\n");
+  for (size_t i = 0; i < context_len; i++) {
+      printf("%s = %.3f\n", context[i].name, context[i].value);
+  }
+	printf("Делительный диаметр полуосевой шестерни: %.3f мм\n", d1.value);
+	printf("Делительный диаметр сателлита: %.3f мм\n", d2.value);
+	printf("Угол делительных конусов delta1: %.3f мм\n", delta1.value);
+	printf("Угол делительных конусов delta2: %.3f мм\n", delta2.value);
+	printf("Внешнее конусное расстояние: %.3f мм\n", Re.value);
+	printf("Ширина зубчатого венца: %.3f мм\n", b.value);
 }
 
 
@@ -451,7 +492,7 @@ void top_gear(){
 								case 2: gear_chain_ratio(); break;
 								case 3: calculate_center_distances(); break;
 								case 4: calculate_radial_distances(); break;
-								case 5: calculate_differential(); break;
+								case 5: calculate_bevel_gear(); break;
                 case 6: gear_menu(); break;
                 case 7: main_menu(); break;
         }

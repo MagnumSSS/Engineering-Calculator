@@ -96,7 +96,16 @@ struct maybe_double start_loop(char* name_file, char* name_formula, struct var c
 					printf("Формула не найдена\n");
 					return none_double;
 				}
-				return compute_and_print(formula, context, context_len);
+				struct maybe_double res= compute_and_print(formula, context, context_len);
+				if(res.valid){
+					if(*context_len < MAX_VARS && name_formula){
+						strncpy(context[*context_len].name, name_formula, sizeof(context[0].name) - 1);
+						context[*context_len].name[sizeof(context[0].name) - 1] = '\0';
+						context[*context_len].value = res.value;
+						(*context_len)++;
+					}
+				}
+				return res;
 			}	
 		}
 		return none_double;

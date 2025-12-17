@@ -158,21 +158,24 @@ void calculate_hypoid(){
 	struct maybe_double dae1 = start_loop((char*)formula_file, (char*)"dae1", context, &context_len);
 	struct maybe_double dae2 = start_loop((char*)formula_file, (char*)"dae2", context, &context_len);
 
+  // Вывод результатов
+    printf("\n--- Результаты расчёта ---\n");
+    if (d1.valid) printf("Внешний делительный диаметр ведущей шестерни (de1): %.3f мм\n", d1.value);
+    if (d2.valid) printf("Внешний делительный диаметр ведомого колеса (de2): %.3f мм\n", d2.value);
+    if (distance_a.valid)   printf("Межосевое расстояние (A): %.3f мм\n", distance_a.value);
+    if (delta1.valid) printf("Угол начального конуса ведущей (delta1): %.3f рад (%.2f°)\n", delta1.value, delta1.value * 180.0 / M_PI);
+    if (delta2.valid) printf("Угол начального конуса ведомого (delta2): %.3f рад (%.2f°)\n", delta2.value, delta2.value * 180.0 / M_PI);
+    if (Re1.valid) printf("Внешнее конусное расстояние (Re): %.3f мм\n", Re1.value);
+    if (beta1.valid) printf("Угол наклона зуба ведущей (beta1): %.3f рад (%.2f°)\n", beta1.value, beta1.value * 180.0 / M_PI);
+    if (beta2.valid) printf("Угол наклона зуба ведомого (beta2): %.3f рад (%.2f°)\n", beta2.value, beta2.value * 180.0 / M_PI);
+    if (dae1.valid) printf("Диаметр вершин ведущей (dae1): %.3f мм\n", dae1.value);
+    if (dae2.valid) printf("Диаметр вершин ведомого (dae2): %.3f мм\n", dae2.value);
+
 
   printf("\n--- Использованные параметры ---\n");
   for (size_t i = 0; i < context_len; i++) {
       printf("%s = %.3f\n", context[i].name, context[i].value);
   }
-	printf("d1: %.3f мм\n", d1.value);
-	printf("d2: %.3f мм\n", d2.value);
-	printf("a: %.3f мм\n", distance_a.value);
-	printf("delta1: %.3f мм\n", delta1.value);
-	printf("delta2: %.3f мм\n", delta2.value);
-	printf("re: %.3f мм\n", Re1.value);
-	printf("beta2: %.3f мм\n", beta2.value);
-	printf("beta1: %.3f мм\n", beta1.value);
-	printf("dae1: %.3f мм\n", dae1.value);
-	printf("dae2: %.3f мм\n", dae2.value);
 }
 
 

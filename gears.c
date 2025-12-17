@@ -82,7 +82,7 @@ float module(){
 
 
 void calculate_bevel_gear(){
-	printf("\n--- Расчёт дифференциала ---\n");
+	printf("\n--- Конической передачи ---\n");
 
 	struct var context[MAX_VARS];
 	size_t context_len = 0;

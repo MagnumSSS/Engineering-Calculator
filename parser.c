@@ -21,7 +21,8 @@ bool is_function(const char* token) {
         strcmp(token, "log") == 0 ||
         strcmp(token, "sin") == 0 ||
         strcmp(token, "cos") == 0 ||
-        strcmp(token, "tan") == 0
+        strcmp(token, "tan") == 0 ||
+				strcmp(token, "atan") == 0
     );
 }
 
@@ -118,6 +119,7 @@ struct maybe_double evaluate_rpn(char* tokens[], size_t n) {
             else if (strcmp(tokens[i], "sin") == 0) res_val = sin(a.value);
             else if (strcmp(tokens[i], "cos") == 0) res_val = cos(a.value);
             else if (strcmp(tokens[i], "tan") == 0) res_val = tan(a.value);
+						else if (strcmp(tokens[i], "atam") == 0) res_val = atan(a.value);
             else { stack_destroy(&s); return none_double; }
             if (!stack_push(&s, res_val)) { stack_destroy(&s); return none_double; }
         }

@@ -1,0 +1,38 @@
+#de1
+m_e * z1
+
+#de2
+m_e * z2
+
+#ratio1
+z1 / z2
+
+#ratio2
+z2 / z1
+
+#delta1
+atan ( ratio1 )
+
+#delta2
+atan ( ratio2 )
+
+#Re
+0.5 * m_e * sqrt ( z1 * z1 + z2 * z2 )
+
+#b
+0.28 * Re
+
+#dae1
+de1 + 2 * m_e * cos ( delta1 )
+
+#dae2
+de2 + 2 * m_e * cos ( delta2 )
+
+#dfe1
+de1 - 2.4 * m_e * cos ( delta1 )
+
+#dfe2
+de2 - 2.4 * m_e * cos ( delta2 )
+
+#mm
+m_e * ( 1 - b / ( 2 * Re ) )

@@ -80,6 +80,19 @@ float module(){
 #include "solver.h"
 #include "utils.h"
 
+
+void calculate_bevel_gear(){
+	printf("\n--- Расчёт дифференциала ---\n");
+
+	struct var context[MAX_VARS];
+	size_t context_len = 0;
+
+	const char* formula_file = "bevel_gear";
+	
+	
+}
+
+
 void calculate_differential() {
     printf("\n--- Расчёт дифференциала ---\n");
 

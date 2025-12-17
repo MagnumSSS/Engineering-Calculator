@@ -1,0 +1,467 @@
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+#define MAX_OPTIONS 10
+#include "main.h"
+#include "gears.h"
+#include "utils.h"
+#include <stdio.h>
+#include <math.h>
+#include <inttypes.h>
+#include <stdlib.h>
+
+struct option_sat{
+        float module;
+        int64_t z_sat;
+        float a;
+        float distance_sat;
+        float d_rad_sat;
+};
+
+
+// Глобальные переменные (реализация)
+const float standard_modules[] = {
+    0.5, 0.6, 0.8, 1.0, 1.125, 1.25, 1.375, 1.5,
+    1.75, 2.0, 2.25, 2.5, 2.75, 3.0, 3.5, 4.0, 4.5, 5.0
+};
+const size_t n_modules = sizeof(standard_modules) / sizeof(standard_modules[0]);
+
+float round_to_standard_module(float m){
+        if(m <= 0.0f){ return 1.0f; }
+
+        float best = standard_modules[0];
+        float best_diff = fabs(m - best);
+
+        for(size_t i = 1; i < n_modules; i++){
+                float diff = fabs(m - standard_modules[i]);
+                if(diff < best_diff){
+                        best_diff = diff;
+                        best = standard_modules[i];
+                }
+
+        }
+        return best;
+
+}
+
+float module(){
+                                printf("Вам известен модуль шестерни?\n");
+                                printf("1. Расчитать модуль введя окружной шаг\n");
+                                printf("2. Ввести модуль\n");
+                                int8_t choise;
+                                scanf("%" SCNd8, &choise);
+                                clear_stdin();
+
+                                switch(choise){
+                                        case 1:
+                                                printf("Введите окружной шаг зубьев Pt: ");
+                                                float pt;
+                                                scanf("%f", &pt);
+                                                clear_stdin();
+                                                float mod = pt / M_PI;
+                                                float mod_s = round_to_standard_module(mod);
+                                                printf("| Вычисленный модуль: %0.3f, округленный модуль по ГОСТу: %0.3f |\n", mod, mod_s);
+                                                return mod_s;
+                                        case 2:
+                                                printf("Введите модуль m: ");
+                                                float m;
+                                                scanf("%f", &m);
+                                                clear_stdin();
+                                                return m;
+                                        default:
+                                                printf("Нормальное число выбери\n");
+                                                return module();
+                                }
+}
+
+
+void calculate_radial_distances(){
+                        struct option_sat sat[MAX_OPTIONS];
+      float module_n = module();
+                        if(module_n <= 0) {
+                                printf("Модуль должен быть больше\n");
+        return;
+                        }
+                        int64_t z_sat;
+                        size_t n, z_cent;
+                        printf("Введите количество зубьев солнца: ");
+                        scanf("%zu", &z_cent);
+                        clear_stdin();
+
+                        printf("Введите количество сатилитов: ");
+                        scanf("%zu", &n);
+                        clear_stdin();
+
+                        float a, distance_sat, d_rad_sat;
+                        //printf("Введите количество зубьев сатилита: ");
+                        //scanf("%zu", &z_sat);
+                        //clear_stdin();
+
+                        size_t option_count = 0;
+                        for(z_sat = (int64_t)z_cent; z_sat >= 1 && option_count < MAX_OPTIONS; z_sat -= 1){
+                                a = (module_n * (z_sat + z_cent) / 2.0);
+                                float corner_to_rad = (180.0f / (float)n) * (M_PI/180.0f);
+                                distance_sat = (2.0*a) * sinf(corner_to_rad);
+                                d_rad_sat = module_n * (z_sat + 2.0);
+
+                                if((z_cent + z_sat) % n == 0){
+                                        if(distance_sat > d_rad_sat){
+                                        sat[option_count].z_sat = z_sat;
+                                        sat[option_count].a = a;
+                                        sat[option_count].distance_sat = distance_sat;
+                                        sat[option_count].d_rad_sat = d_rad_sat;
+                                        option_count++;
+                                        }
+                                }
+                                if(z_sat < 17){
+                                        printf("Внимание z_sat = " "%" PRId64 "< 17 - возможна подрезания зубьев\n", z_sat);
+                                }
+                        }
+
+                        if(option_count == 0){
+                                printf("Вариантов нет\n");
+                                return;
+                        }
+
+                        printf("\n\t= = = Варианты Сатилитов и эпициклов = = =\t\n");
+                        for(size_t i = 0; i < option_count; i++){
+                                        printf("\n\t+= = = Результаты расчетов параметров Сатилитов #%zu = = =+\t\n", i+1);
+                                        printf("\t| Количество зубьев сатилитов:                 " "%" PRId64 " |\n", sat[i].z_sat);
+                                        printf("\t| Межосевое расстояние и радиус расположения сатилитов: %0.2f |\n", sat[i].a);
+                                        printf("\t| Расстояния между осями сатилитов:                     %0.2f |\n", sat[i].distance_sat);
+                                        printf("\t| Наружный диаметр сатилитов:                           %0.2f |\n", sat[i].d_rad_sat);
+
+
+                                        printf("\n\t+= = = Результаты расчетов параметров Эпицикла #%zu = = =+\t\n", i);
+                                        //число зубьев эпицикла
+                                        int64_t z_epi = z_cent + (2 * sat[i].z_sat);
+                                        printf("\t| Число зубьев Эпицикла:            " "%" PRId64 " |\n", z_epi);
+
+                                        //делительный диаметр
+                                        float d_epi = module_n * z_epi;
+                                        printf("\t| Делительный диаметр Эпицикла:   %0.1f |\n", d_epi);
+
+                                        //диаметр вершин
+                                        float d_epi_z = module_n * (z_epi - 2);
+                                        printf("\t| Диаметр вершин Эпицикла:        %0.1f |\n", d_epi_z);
+
+                                        //диаметр впадин
+                                        float d_epi_f = module_n * (z_epi + 2.5);
+                                        printf("\t| Диаметр впадин Эпицикла:        %0.1f |\n", d_epi_f);
+
+                                        printf("\n\t##################################################\n");
+                        }
+
+}
+
+void bevel_planetar_gear(){
+        struct option_sat sat[MAX_OPTIONS];
+  float module_n = module();
+  if(module_n <= 0) {
+                printf("Модуль должен быть больше\n");
+    return;
+  }
+  int64_t z_sat;
+  size_t n, z_cent;
+        float beta;
+  printf("Введите количество зубьев солнца: ");
+  scanf("%zu", &z_cent);
+  clear_stdin();
+
+  printf("Введите количество сатилитов: ");
+  scanf("%zu", &n);
+  clear_stdin();
+
+        printf("Введите угол наклона Бета: ");
+        printf("Тихоходные 8° – 15°\n");
+        printf("Общего назначения 15° – 25°\n");
+        printf("Высокоскоростные 25° – 45°\n");
+        scanf("%f", &beta);
+        beta = beta * (M_PI / 180.0f);
+
+        size_t option_count = 0;
+  float a, distance_sat, d_rad_sat;
+        for(z_sat = (int64_t)z_cent; z_sat >= 1 && option_count < MAX_OPTIONS; z_sat -= 1){
+                        a = module_n * (z_cent + z_sat) / (2.0f * cosf(beta));
+                        float corner_to_rad = (180.0f / (float)n) * (M_PI/180.0f);
+                        distance_sat = (2.0*a) * sinf(corner_to_rad);
+                        d_rad_sat = module_n * (z_sat + 2.0) / cosf(beta);
+
+                        if((z_cent + z_sat) % n == 0){
+                                if(distance_sat > d_rad_sat){
+                                sat[option_count].z_sat = z_sat;
+                                sat[option_count].a = a;
+                                sat[option_count].distance_sat = distance_sat;
+                                sat[option_count].d_rad_sat = d_rad_sat;
+                                option_count++;
+                                }
+                        }
+                        if(z_sat < 17){
+                                printf("Внимание z_sat = " "%" PRId64 "< 17 - возможна подрезания зубьев\n", z_sat);
+                        }
+        }
+
+
+                        printf("\n\t= = = Варианты Сатилитов и эпициклов = = =\t\n");
+                        LOG("\n\t= = = Варианты Сатилитов и эпициклов = = =\t\n");
+                        for(size_t i = 0; i < option_count; i++){
+                                        printf("\n\t+= = = Результаты расчетов параметров Сатилитов #%zu = = =+\t\n", i+1);
+                                        LOG("\n\t+= = = Результаты расчетов параметров Сатилитов #%zu = = =+\t\n", i+1);
+                                        printf("\t| Количество зубьев сатилитов:                 " "%" PRId64 " |\n", sat[i].z_sat);
+                                        LOG("\t| Количество зубьев сатилитов:                 " "%" PRId64 " |\n", sat[i].z_sat);
+                                        printf("\t| Межосевое расстояние и радиус расположения сатилитов: %0.2f |\n", sat[i].a);
+                                        LOG("\t| Межосевое расстояние и радиус расположения сатилитов: %0.2f |\n", sat[i].a);
+                                        printf("\t| Расстояния между осями сатилитов:                     %0.2f |\n", sat[i].distance_sat);
+                                        LOG("\t| Расстояния между осями сатилитов:                     %0.2f |\n", sat[i].distance_sat);
+                                        printf("\t| Наружный диаметр сатилитов:                           %0.2f |\n", sat[i].d_rad_sat);
+                                        LOG("\t| Наружный диаметр сатилитов:                           %0.2f |\n", sat[i].d_rad_sat);
+
+                                        printf("\n\t+= = = Результаты расчетов параметров Эпицикла #%zu = = =+\t\n", i+1);
+                                        LOG("\n\t+= = = Результаты расчетов параметров Эпицикла #%zu = = =+\t\n", i+1);
+                                        //число зубьев эпицикла
+                                        int64_t z_epi = z_cent + (2 * sat[i].z_sat);
+                                        printf("\t| Число зубьев Эпицикла:            " "%" PRId64 " |\n", z_epi);
+                                        LOG("\t| Число зубьев Эпицикла:            " "%" PRId64 " |\n", z_epi);
+
+                                        //делительный диаметр
+                                        float d_epi = module_n * z_epi / cosf(beta);
+                                        printf("\t| Делительный диаметр Эпицикла:   %0.1f |\n", d_epi);
+                                        LOG("\t| Делительный диаметр Эпицикла:   %0.1f |\n", d_epi);
+
+                                        //диаметр вершин
+                                        float d_epi_z = module_n * (z_epi - 2) / cosf(beta);
+                                        printf("\t| Диаметр вершин Эпицикла:        %0.1f |\n", d_epi_z);
+                                        LOG("\t| Диаметр вершин Эпицикла:        %0.1f |\n", d_epi_z);
+
+                                        //диаметр впадин
+                                        float d_epi_f = module_n * (z_epi + 2.5) / cosf(beta);
+                                        printf("\t| Диаметр впадин Эпицикла:        %0.1f |\n", d_epi_f);
+                                        LOG("\t| Диаметр вершин Эпицикла:        %0.1f |\n", d_epi_z);
+
+                                        printf("\n\t##################################################\n");
+                                        LOG("\n\t##################################################\n");
+
+                                        printf("Перерасчитать?(y/n) \n");
+
+                        }
+}
+
+void calculate_center_distances(){
+                        float m = module();
+                        if(m <= 0) {
+                                printf("Модуль должен быть больше\n");
+                                return;
+                        }
+
+      size_t n;
+      printf("Введите количество ступеней(пар шестерен): ");
+      scanf("%zu", &n);
+                        clear_stdin();
+
+      float* a_list = malloc(n * sizeof(float));
+                        if(a_list == NULL) return;
+      float total_distance = 0.0f;
+
+      for(size_t i = 0; i < n; i++){
+              size_t z_driving, z_driven;
+              printf("Ступень %zu:\n", i + 1);
+              printf("Число зубьев ведущей шестерни: ");
+              scanf("%zu", &z_driving);
+                                                        clear_stdin();
+              printf("Число зубьев ведомой шестерни: ");
+                                                        scanf("%zu", &z_driven);
+                                                        clear_stdin();
+
+              if(z_driving <= 0 || z_driven <= 0){
+                      printf("Количество зубьев должно быть больше\n");
+                      free(a_list);
+                      return;
+                }
+
+              a_list[i] = (m * (z_driving + z_driven)) / 2.0;
+              total_distance += a_list[i];
+
+        }
+                        printf("\n      \t+= = = Результаты = = =+\t\n");
+                        LOG("\n      \t+= = = Результаты Расчета межосевого расстояния= = =+\t\n");
+      for(size_t i = 0; i < n; i++){
+                                                        printf("\t| Ступень %zu: a =              %.2f мм |\n", i+1, a_list[i]);
+                                                        LOG("\t| Ступень %zu: a =              %.2f мм |\n", i+1, a_list[i]);
+      }
+      printf("\t| Общая длина линейной ступени: %0.2f мм |\n", total_distance);
+                        LOG("\t| Общая длина линейной ступени: %0.2f мм |\n", total_distance);
+      free(a_list);
+}
+
+void gear_chain_ratio(){
+        printf("| Ведущая шестерня — та, что приводится в движение (ближе к двигателю) |\n");
+        printf("|           Ведомая шестерня — та, что вращается от ведущей            |\n");
+
+        size_t n;
+        printf("Введите количество ступеней(пар шестерен): ");
+        scanf("%zu", &n);
+
+        float* ratios = malloc(n * sizeof(float));
+        if(ratios == NULL) return;
+
+        float total_ratios = 1.0f;
+
+        for(size_t i = 0; i < n; i++){
+                size_t z_driving, z_driven;
+                printf("\nСтупень %zu:\n", i + 1);
+                printf("Число зубьев ведущей шестерни: ");
+                scanf("%zu", &z_driving);
+                clear_stdin();
+                printf("Число зубьев ведомой шестерни: ");
+                scanf("%zu", &z_driven);
+                clear_stdin();
+
+                if(z_driving <= 0 || z_driven <= 0){
+                        printf("Количество зубьев должно быть больше\n");
+                        free(ratios);
+                        return;
+                }
+
+                ratios[i] = (float)z_driven / z_driving;
+                total_ratios *= ratios[i];
+
+        }
+
+        printf("\n  \t+= = = Результаты Расчета Передач = = =+\t\n");
+        LOG("\n  \t+= = = Результаты Расчета Передач = = =+\t\n");
+        LOG("\t|Ступеней:                    %zu |\n", n);
+        for(size_t i = 0; i < n; i++){
+                printf("\t| Ступень %zu: ПЧ =        %.3f |\n", i+1, ratios[i]);
+                LOG("\t| Ступень %zu: ПЧ =        %.3f |\n", i+1, ratios[i]);
+        }
+        printf("\t| Общее передаточное число: %0.3f |\n", total_ratios);
+        LOG("\t| Общее передаточное число: %0.3f |\n", total_ratios);
+        free(ratios);
+}
+
+void gear_calc(){
+        float z;
+        printf("Введите кол-во зубьев вашей шестерни: ");
+        scanf("%f", &z);
+        clear_stdin();
+        float m = module();
+                                LOG("=== Расчет стандартных параметров шестерни ===\n");
+                                printf("\n\t+= = = = = = =   Результаты   = = = = = = =+\t\n");
+
+
+        float d = z*m;
+        printf("\t| Диаметр Делительный d:              %0.1f |\n", d);
+                                LOG("| Диаметр Делительный d:              %0.1f |\n", d);
+
+        float h = 2.25*m;
+        printf("\t| Высота зуба h:                       %0.1f |\n", h);
+                                LOG("| Высота зуба h:                      %0.1f |\n", h);
+
+        float ha = m;
+        printf("\t| Высота головки ha:                   %0.1f |\n", ha);
+                                LOG("| Высота головки ha:                  %0.1f |\n", ha);
+
+        float hf = 1.25*m;
+        printf("\t| Высота ножки hf:                     %0.1f |\n", hf);
+                                LOG("| Высота ножки hf:                    %0.1f |\n", hf);
+
+        float da = d + (2*ha);
+        printf("\t| Диаметр вершин зубьев da:           %0.1f |\n", da);
+                                LOG("| Диаметр вершин зубьев da:           %0.1f |\n", da);
+
+        float df = d - (2*hf);
+        printf("\t| Диаметр впадин зубчатого колеса df: %0.1f |\n", df);
+                                LOG("| Диаметр впадин зубчатого колеса df: %0.1f |\n", df);
+                                LOG("\n");
+}
+
+
+
+void top_gear(){
+        printf("\n\tРасчетный калькулятор Стандартных параметров шестерни\t\n");
+        printf("-> 1. Перейти к расчетам параметров одной шестерни\n");
+                                printf("-> 2. Расчитать передаточное число ступеней\n");
+                                printf("-> 3. Расчитать межосевое расстояние цепи шестерен\n");
+                                printf("-> 4. Расчитать планетарную передачу\n");
+        printf("-> 5. Вернуться к выбору опций Шестерни\n");
+        printf("-> 6. Вернуться в меню\n");
+        int8_t choise;
+        scanf("%" SCNd8, &choise);
+        clear_stdin();
+        switch(choise){
+                case 1: gear_calc(); break;
+                                                                case 2: gear_chain_ratio(); break;
+                                                                case 3: calculate_center_distances(); break;
+                                                                case 4: calculate_radial_distances(); break;
+                case 5: gear_menu(); break;
+                case 6: main_menu(); break;
+        }
+}
+
+
+void bevel_gear_calc(){
+        float z = number_user_input("Число Зубьв Z");
+        float de = number_user_input("Диаметр Вершин De");
+        float beta = number_user_input("Угол наклона на вершинах Be");
+
+        float beta_rad = beta * (M_PI / 180.0);
+        float target = z * tanf(beta_rad);
+
+        float beta_deg = 0;
+        //float beta_deg_rad = beta_deg * (M_PI / 180.0);
+
+        for(size_t i = 0; i < 50; i++){
+                beta_deg = beta - 1.0;
+                float beta_deg_rad = beta_deg * (M_PI / 180.0);
+
+                float beta_sin = sinf(beta_deg_rad);
+                float beta_math = target / (z / cosf(beta_deg_rad) + 2);
+
+                if(fabsf(beta_sin - beta_math) < 1e-5) break;
+
+                if(beta_sin < beta_math) beta_deg += 0.1f;
+                else beta_deg -= 0.1f;
+
+        }
+                                printf("\n              \t+= = = Результаты = = =+\t\n");
+        printf("\t| Угол наклона на делительной окружности:                      %0.1f |\n", beta_deg);
+        float module_normal = de / (z / cosf(beta_deg * (M_PI/180)) + 2.0);
+
+        module_normal = round_to_standard_module(module_normal);
+        printf("\t| Нормальный Модуль данной шестерни по полученным результатам: %0.1f |\n", module_normal);
+}
+
+void bevel_gear(){
+        printf("\n\tРасчетный калькулятор Косозубой Шестерни\t\n");
+        printf("-> 1. Перейти к расчетам угла Бета\n");
+                                printf("-> 2. Расчитать косозубую планетарную шестерню\n");
+        printf("-> 3. Вернуться к выбору опций Шестерни\n");
+        printf("-> 4. Вернуться в меню\n");
+        int8_t choise;
+        scanf("%" SCNd8, &choise);
+        clear_stdin();
+        switch(choise){
+                case 1: bevel_gear_calc(); break;
+                                                                case 2: bevel_planetar_gear(); break;
+                                                                case 3: gear_menu(); break;
+                case 4: main_menu(); break;
+        }
+}
+
+void gear_menu(){
+   printf("\n\tРасчетный калькулятор Шестерни\t\n");
+   printf("Что расчитать?\n");
+   printf("-> 1. Стандартные расчетные параметры\n");
+   printf("-> 2. Особые параметры для косозубой шестерни\n");
+   printf("-> 3. Вернутся к выбору\n");
+
+   int8_t choise;
+   scanf("%" SCNd8, &choise);
+   clear_stdin();
+   switch(choise){
+     case 1: top_gear(); break;
+     case 2: bevel_gear(); break;
+     case 3: main_menu(); break;
+   }
+
+}

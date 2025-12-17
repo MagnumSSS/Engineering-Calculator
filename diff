@@ -1,0 +1,8 @@
+#Sun_Diameter
+m * z_sun
+
+#Ring_Diameter
+m * z_ring
+
+#Diff_Ratio
+( z_ring / z_sun ) + 1

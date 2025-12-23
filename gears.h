@@ -8,6 +8,8 @@ extern const size_t n_modules;
 
 
 // Прототипы функций
+void calculate_hypoid();
+void calculate_bevel_gear();
 void calculate_radial_distances();
 void calculate_center_distances();
 void gear_chain_ratio(void);

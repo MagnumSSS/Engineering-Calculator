@@ -308,7 +308,7 @@ void bevel_planetar_gear(){
 
 
 			printf("\n\t= = = Варианты Сатилитов и эпициклов = = =\t\n");
-			LOG("\n\t= = = Варианты Сатилитов и эпициклов = = =\t\n");
+			//LOG("\n\t= = = Варианты Сатилитов и эпициклов = = =\t\n");
 			for(size_t i = 0; i < option_count; i++){
 					printf("\n\t+= = = Результаты расчетов параметров Сатилитов #%zu = = =+\t\n", i+1);
 					//LOG("\n\t+= = = Результаты расчетов параметров Сатилитов #%zu = = =+\t\n", i+1);
@@ -434,7 +434,7 @@ void gear_chain_ratio(){
 
 	printf("\n  \t+= = = Результаты Расчета Передач = = =+\t\n");
 	//LOG("\n  \t+= = = Результаты Расчета Передач = = =+\t\n");
-	LOG("\t|Ступеней:                    %zu |\n", n);
+	//LOG("\t|Ступеней:                    %zu |\n", n);
 	for(size_t i = 0; i < n; i++){
 		printf("\t| Ступень %zu: ПЧ =        %.3f |\n", i+1, ratios[i]);
 		//LOG("\t| Ступень %zu: ПЧ =        %.3f |\n", i+1, ratios[i]);
@@ -444,7 +444,7 @@ void gear_chain_ratio(){
 	free(ratios);
 }
 
-void gear_calc(){
+void gear_calc(void){
         float z;
         printf("Введите кол-во зубьев вашей шестерни: ");
         scanf("%f", &z);

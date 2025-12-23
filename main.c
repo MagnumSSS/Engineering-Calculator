@@ -23,6 +23,8 @@ static const struct command commands[] = {
     {"дифференциал", calculate_hypoid},
     {"межосевое_расстояние", calculate_center_distances},
     {"передаточное_число", gear_chain_ratio},
+		{"профиль_резьбы", carving_profile},
+		{"шаг_резьбы", find_word}
 };
 
 static const size_t num_commands = sizeof(commands) / sizeof(commands[0]);
@@ -100,8 +102,13 @@ void parser(char** tokens, size_t count){
             printf("Для этой группы нет расчетов\n");
             return;
           }
-        }
-        else{
+        }else if(strcmp(tokens[0], "помощь") == 0){
+					printf("Основные команды: \n");
+					printf("показать расчеты шестерни/резьбы <- показывает все возможные расчеты той или иной группы\n");
+					printf("рассчитать X <- рассчитывает одну из формул одной из групп\n");
+					printf("выход <- выход из программы\n");
+					return;
+				}else{
             printf("Неправильно введена команда\n");
 						return;
         }
@@ -112,7 +119,7 @@ void parser(char** tokens, size_t count){
 // Реализация CLI
 void main_menu() {
         bool run = true;
-        printf("Вы можете посмотреть все расчеты через \"показать расчеты (шестерни или резьбы)\"\n");
+        printf("Введите команду \"помощь\" для информации о командах\n");
         while(run){
           printf("> ");
           char input[256];

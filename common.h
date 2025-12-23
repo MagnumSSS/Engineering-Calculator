@@ -16,6 +16,13 @@ struct var {
 };
 
 
+// указатель на функции и структура
+typedef void (*command_func_t)(void);
+struct command {
+    const char* keyword;      // псевдоимя: "шестерни", "резьба", "дифференциал"
+    command_func_t handler;   // указатель на функцию
+};
+
 
 // Упаковка double
 struct maybe_double {

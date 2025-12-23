@@ -3,7 +3,6 @@
 
 // Резьбы
 void find_word();
-void carving_menu();
 void carving_profile();
 
 

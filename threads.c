@@ -19,23 +19,6 @@ void carving_profile(){
         printf("Высота профиля резьбы: %0.3f\n", res);
 }
 
-void carving_menu(){
-        printf("\n\tРасчетный калькулятор Резьбы\t\n");
-        printf("Что расчитать?\n");
-        printf("1. Профиль резьбы\n");
-        printf("2. Вывод стандартного шага для резьбы\n");
-  printf("3. Вернутся к выбору\n");
-
-  int8_t choise;
-  scanf("%" SCNd8, &choise);
-  clear_stdin();
-  switch(choise){
-    case 1: carving_profile(); break;
-    case 2: find_word(); break;
-    case 3: main_menu(); break;
-  }
-
-}
 
 void find_word(){
         FILE *file = fopen("carving.txt", "r");
